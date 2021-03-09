@@ -59,7 +59,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }} 
       
     # Run dotnet build and publish
-    - name: dotnet build and publish
+    - name: Dotnet Build and Publish
       run: |
         dotnet restore ${{env.AZURE_WEBAPP_PACKAGE_PATH}}/*.csproj
         dotnet build --configuration Release --no-restore ${{env.AZURE_WEBAPP_PACKAGE_PATH}}/*.csproj
