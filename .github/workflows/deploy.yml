@@ -17,15 +17,25 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     env:
       ResourceGroupName: "ArchitectsConnect"
       ResourceGroupLocation: "westeurope"
+      AZURE_WEBAPP_NAME: architectsconnect             # set this to your application's name
+      AZURE_WEBAPP_PACKAGE_PATH: './src/SimpleWebApp'  # set this to the path to your web app project, defaults to the repository root
+      DOTNET_VERSION: '3.1.301'                        # set this to the dot net version to use
+
     steps:
-    - uses: actions/checkout@main
-    - uses: azure/login@v1
+    - name: Checkout Main Branch
+      uses: actions/checkout@main
+
+    - name: AZ Login
+      uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - uses: Azure/CLI@v1
+    
+    - name: Create Resource Group
+      uses: Azure/CLI@v1
       with:
         inlineScript: |
           #!/bin/bash
@@ -35,7 +45,29 @@ jobs:
             az group create --name ${{ env.ResourceGroupName }} --location ${{ env.ResourceGroupLocation }}
             echo "Azure resource group created"
           fi
-    - uses: azure/arm-deploy@v1
+
+    - name: Apply ARM Template
+      uses: azure/arm-deploy@v1
       with:
         resourceGroupName: ${{ env.ResourceGroupName }}
         template: ./deploy/azuredeploy.json
+
+    # Setup .NET Core SDK
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }} 
+      
+    # Run dotnet build and publish
+    - name: dotnet build and publish
+      run: |
+        dotnet restore
+        dotnet build --configuration Release
+        dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp' 
+          
+    # Deploy to Azure Web apps
+    - name: 'Run Azure webapp deploy action using publish profile credentials'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.AZURE_WEBAPP_NAME }} # Replace with your app name
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
