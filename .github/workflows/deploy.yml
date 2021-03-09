@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Prepare
+name: Deploy
 
 # Controls when the action will run. 
 on:
@@ -33,5 +33,5 @@ jobs:
       with:
         azcliversion: 2.0.72
         inlineScript: |
-          chmod +x $GITHUB_WORKSPACE/prepareResourceGroup.sh
-          $GITHUB_WORKSPACE/prepareResourceGroup.sh
+          chmod +x $GITHUB_WORKSPACE/deploy/prepareResourceGroup.sh
+          $GITHUB_WORKSPACE/deploy/prepareResourceGroup.sh
