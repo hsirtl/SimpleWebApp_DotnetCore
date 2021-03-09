@@ -15,23 +15,27 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      ResourceGroupName: "ArchitectsConnect"
+      ResourceGroupLocation: "West Europe"
     steps:
-    
-    - name: Azure Login
-      uses: azure/login@v1
+    - uses: actions/checkout@main
+    - uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - name: Azure CLI script file
-      uses: azure/CLI@v1
+    - uses: Azure/CLI@v1
       with:
-        azcliversion: 2.0.72
         inlineScript: |
-          chmod +x $GITHUB_WORKSPACE/deploy/prepareResourceGroup.sh
-          $GITHUB_WORKSPACE/deploy/prepareResourceGroup.sh
+          #!/bin/bash
+          if $(az group exists --name ${{ env.ResourceGroupName }}) ; then
+            echo "Azure resource group already exists, skipping creation..."
+          else
+            az group create --name ${{ env.ResourceGroupName }} --location ${{ env.ResourceGroupLocation }}
+            echo "Azure resource group created"
+          fi
+    - uses: azure/arm-deploy@v1
+      with:
+        resourceGroupName: ${{ env.ResourceGroupName }}
+        template: ./deploy/azuredeploy.json
