@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ResourceGroupName: "ArchitectsConnect"
-      ResourceGroupLocation: "West Europe"
+      ResourceGroupLocation: "westeurope"
     steps:
     - uses: actions/checkout@main
     - uses: azure/login@v1
