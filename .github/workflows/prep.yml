@@ -25,9 +25,13 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Azure CLI script
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Azure CLI script file
       uses: azure/CLI@v1
       with:
         azcliversion: 2.0.72
         inlineScript: |
-          az account show
+          chmod +x $GITHUB_WORKSPACE/prepareResourceGroup.sh
+          $GITHUB_WORKSPACE/prepareResourceGroup.sh
